@@ -1,16 +1,19 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import MyContext from './MyContext';
 
-const INITIAL_STATE = [];
-const STATE_FILTER = {
-  nome: '',
-};
-
 function Provider({ children }) {
-  const [state, setState] = useState(INITIAL_STATE);
-  const [filterByName, setFilterByName] = useState(STATE_FILTER);
+  const [state, setState] = useState([]);
   const [filteredPlanets, setFilteredPlanets] = useState([]);
+  const [filterByName, setFilterByName] = useState({
+    nome: '',
+  });
+
+  const [filterState, setFilterState] = useState({
+    coluna: 'population',
+    operador: 'maior que',
+    valor: 0,
+  });
 
   useEffect(() => {
     const fetchPlanets = async () => {
@@ -38,12 +41,32 @@ function Provider({ children }) {
     }
   }, [filterByName, state]);
 
+  const filterPlanetsButton = useCallback(() => {
+    const { coluna, operador, valor } = filterState;
+    const filterByColumn = state.filter((planet) => {
+      const valueColum = Number(planet[coluna]);
+      const valueCompare = Number(valor);
+      switch (operador) {
+      case 'maior que':
+        return valueColum > valueCompare;
+      case 'menor que':
+        return valueColum < valueCompare;
+      default:
+        return valueColum === valueCompare;
+      }
+    });
+    setFilteredPlanets(filterByColumn);
+  }, [state, filterState]);
+
   const contextValue = useMemo(() => ({
     state,
-    setFilterByName,
     filteredPlanets,
     filterByName,
-  }), [state, filteredPlanets, filterByName]);
+    setFilterByName,
+    setFilterState,
+    filterState,
+    filterPlanetsButton,
+  }), [state, filteredPlanets, filterByName, filterState, filterPlanetsButton]);
 
   return (
     <MyContext.Provider value={ contextValue }>
