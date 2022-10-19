@@ -3,9 +3,14 @@ import PropTypes from 'prop-types';
 import MyContext from './MyContext';
 
 const INITIAL_STATE = [];
+const STATE_FILTER = {
+  nome: '',
+};
 
 function Provider({ children }) {
   const [state, setState] = useState(INITIAL_STATE);
+  const [filterByName, setFilterByName] = useState(STATE_FILTER);
+  const [filteredPlanets, setFilteredPlanets] = useState([]);
 
   useEffect(() => {
     const fetchPlanets = async () => {
@@ -20,9 +25,25 @@ function Provider({ children }) {
     fetchPlanets();
   }, []);
 
+  useEffect(() => {
+    const { nome } = filterByName;
+    if (nome !== '') {
+      const planetsFilteredByName = state.filter((planet) => {
+        const planetName = planet.name.toLowerCase();
+        return planetName.includes(nome);
+      });
+      setFilteredPlanets(planetsFilteredByName);
+    } else {
+      setFilteredPlanets(state);
+    }
+  }, [filterByName, state]);
+
   const contextValue = useMemo(() => ({
     state,
-  }), [state]);
+    setFilterByName,
+    filteredPlanets,
+    filterByName,
+  }), [state, filteredPlanets, filterByName]);
 
   return (
     <MyContext.Provider value={ contextValue }>

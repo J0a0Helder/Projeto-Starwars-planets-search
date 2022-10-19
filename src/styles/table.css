@@ -2,7 +2,12 @@
 https://www.youtube.com/watch?v=TCh8qgSp1KY&ab_channel=EdiCursos */
 
 * {
+  box-sizing: border-box;
   font-family: Arial , Helvetica , sans-serif;
+  margin: 0;
+  outline: none;
+  padding: 0;
+  text-decoration: none;
 }
 
 table, th, td {
