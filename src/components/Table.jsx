@@ -9,7 +9,8 @@ function Table() {
     filterByName,
     setFilterState,
     filterState,
-    filterPlanetsButton } = useContext(MyContext);
+    filterPlanetsButton,
+    options } = useContext(MyContext);
 
   const { nome } = filterByName;
   const { coluna, operador, valor } = filterState;
@@ -65,11 +66,9 @@ function Table() {
             onChange={ handleChange }
             name="coluna"
           >
-            <option value="population">population</option>
-            <option value="orbital_period">orbital_period</option>
-            <option value="diameter">diameter</option>
-            <option value="rotation_period">rotation_period</option>
-            <option value="surface_water">surface_water</option>
+            {
+              options.map((e) => <option key={ e } value={ e }>{e}</option>)
+            }
           </select>
         </label>
 
@@ -146,7 +145,7 @@ function Table() {
                   {element.edited}
                 </td>
                 <td>
-                  {element.url}
+                  <a href={ element.url }>{element.url}</a>
                 </td>
               </tr>
             ))

@@ -3,17 +3,40 @@ import PropTypes from 'prop-types';
 import MyContext from './MyContext';
 
 function Provider({ children }) {
+  // ============================== Estados ============================== //
+
+  // ========== estado inicial ========== //
   const [state, setState] = useState([]);
+
+  // ========== estado com os planetas filtrados ========== //
   const [filteredPlanets, setFilteredPlanets] = useState([]);
+
+  // ========== estado para filtrar por nome ========== //
   const [filterByName, setFilterByName] = useState({
     nome: '',
   });
 
+  // ========== estado que filtra por coluna, operador e valor ========== //
   const [filterState, setFilterState] = useState({
     coluna: 'population',
     operador: 'maior que',
     valor: 0,
   });
+
+  // ========== estado que salva as options ========== //
+  const [options, setOptions] = useState(['population',
+    'orbital_period',
+    'diameter',
+    'rotation_period',
+    'surface_water',
+  ]);
+
+  // ========== estado que salva os filtros usados ========== //
+  // const [filters, setFilters] = useState([{}]);
+
+  // ============================== Funções ============================== //
+
+  // ========== requisição a API e colocando no estado ========== //
 
   useEffect(() => {
     const fetchPlanets = async () => {
@@ -28,6 +51,8 @@ function Provider({ children }) {
     fetchPlanets();
   }, []);
 
+  // ========== filtro por nome ========== //
+
   useEffect(() => {
     const { nome } = filterByName;
     if (nome !== '') {
@@ -41,9 +66,11 @@ function Provider({ children }) {
     }
   }, [filterByName, state]);
 
+  // ===== filtra por coluna, valor e operador e remove as options do array ===== //
+
   const filterPlanetsButton = useCallback(() => {
     const { coluna, operador, valor } = filterState;
-    const filterByColumn = state.filter((planet) => {
+    const filterByColumn = filteredPlanets.filter((planet) => {
       const valueColum = Number(planet[coluna]);
       const valueCompare = Number(valor);
       switch (operador) {
@@ -55,18 +82,26 @@ function Provider({ children }) {
         return valueColum === valueCompare;
       }
     });
+
     setFilteredPlanets(filterByColumn);
-  }, [state, filterState]);
+    // setOrderList((prevState) => ({ ...prevState,
+    //   coluna,
+    //   operador,
+    //   valor }));
+    setOptions(options.filter((e) => e !== coluna));
+  }, [filterState, filteredPlanets, options]);
+
+  // ========== valor do contexto e envio das funções ========== //
 
   const contextValue = useMemo(() => ({
-    state,
     filteredPlanets,
     filterByName,
     setFilterByName,
     setFilterState,
     filterState,
     filterPlanetsButton,
-  }), [state, filteredPlanets, filterByName, filterState, filterPlanetsButton]);
+    options,
+  }), [filteredPlanets, filterByName, filterState, filterPlanetsButton, options]);
 
   return (
     <MyContext.Provider value={ contextValue }>
