@@ -114,7 +114,7 @@ function Table() {
         <button
           type="button"
           data-testid="button-filter"
-          onClick={ () => filterPlanetsButton() }
+          onClick={ filterPlanetsButton }
         >
           Filtrar
         </button>

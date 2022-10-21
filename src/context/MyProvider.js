@@ -67,6 +67,9 @@ function Provider({ children }) {
     }
   }, [filterByName, state]);
 
+  // ========== filtro por nome ========== //
+  // gostaria de agradecer ao Andre pela ajuda na mentoria <3 //
+
   const handleFilters = useCallback((FiltersList) => {
     let filterByColumn = state;
     FiltersList.forEach((filtro) => {
@@ -82,20 +85,27 @@ function Provider({ children }) {
           return valueColum === valueCompare;
         }
       });
-      setOptions(options.filter((e) => e !== filtro.coluna));
     });
     setFilteredPlanets(filterByColumn);
-  }, [options, state]);
+  }, [state]);
 
   // ===== filtra por coluna, valor e operador e remove as options do array ===== //
+  // gostaria de agradecer ao Henrique pela ajuda na mentoria <3 //
 
-  const filterPlanetsButton = useCallback(() => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const filterPlanetsButton = () => {
     const { coluna, operador, valor } = filterState;
     const filter = { coluna, operador, valor };
     const currentyFilter = [...filters, filter];
     setFilters(currentyFilter);
     handleFilters(currentyFilter);
-  }, [filterState, filters, handleFilters]);
+    const newOptions = options.filter((e) => e !== coluna);
+    setOptions(newOptions);
+    console.log(newOptions);
+    setFilterState((prevState) => ({ ...prevState,
+      coluna: newOptions[0],
+    }));
+  };
 
   // ===== remove todos os filtros ===== //
 
