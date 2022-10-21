@@ -2,6 +2,12 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import MyContext from './MyContext';
 
+const option = ['population',
+  'orbital_period',
+  'diameter',
+  'rotation_period',
+  'surface_water',
+];
 function Provider({ children }) {
   // ============================== Estados ============================== //
 
@@ -24,15 +30,10 @@ function Provider({ children }) {
   });
 
   // ========== estado que salva as options ========== //
-  const [options, setOptions] = useState(['population',
-    'orbital_period',
-    'diameter',
-    'rotation_period',
-    'surface_water',
-  ]);
+  const [options, setOptions] = useState(option);
 
   // ========== estado que salva os filtros usados ========== //
-  // const [filters, setFilters] = useState([{}]);
+  const [filters, setFilters] = useState([]);
 
   // ============================== Funções ============================== //
 
@@ -66,30 +67,53 @@ function Provider({ children }) {
     }
   }, [filterByName, state]);
 
+  const handleFilters = useCallback((FiltersList) => {
+    let filterByColumn = state;
+    FiltersList.forEach((filtro) => {
+      filterByColumn = filterByColumn.filter((planet) => {
+        const valueColum = Number(planet[filtro.coluna]);
+        const valueCompare = Number(filtro.valor);
+        switch (filtro.operador) {
+        case 'maior que':
+          return valueColum > valueCompare;
+        case 'menor que':
+          return valueColum < valueCompare;
+        default:
+          return valueColum === valueCompare;
+        }
+      });
+      setOptions(options.filter((e) => e !== filtro.coluna));
+    });
+    setFilteredPlanets(filterByColumn);
+  }, [options, state]);
+
   // ===== filtra por coluna, valor e operador e remove as options do array ===== //
 
   const filterPlanetsButton = useCallback(() => {
     const { coluna, operador, valor } = filterState;
-    const filterByColumn = filteredPlanets.filter((planet) => {
-      const valueColum = Number(planet[coluna]);
-      const valueCompare = Number(valor);
-      switch (operador) {
-      case 'maior que':
-        return valueColum > valueCompare;
-      case 'menor que':
-        return valueColum < valueCompare;
-      default:
-        return valueColum === valueCompare;
-      }
-    });
+    const filter = { coluna, operador, valor };
+    const currentyFilter = [...filters, filter];
+    setFilters(currentyFilter);
+    handleFilters(currentyFilter);
+  }, [filterState, filters, handleFilters]);
 
-    setFilteredPlanets(filterByColumn);
-    // setOrderList((prevState) => ({ ...prevState,
-    //   coluna,
-    //   operador,
-    //   valor }));
-    setOptions(options.filter((e) => e !== coluna));
-  }, [filterState, filteredPlanets, options]);
+  // ===== remove todos os filtros ===== //
+
+  const clearAllFilters = useCallback(() => {
+    setFilters([]);
+    setOptions(option);
+    setFilteredPlanets(state);
+  }, [state]);
+
+  // ===== remove filtros especificos ===== //
+
+  const clearFilter = useCallback(({ coluna }) => {
+    const newFilters = filters.filter((element) => element.coluna !== coluna);
+    const currentyOptions = [...options, coluna];
+    setOptions(currentyOptions);
+    setFilters(newFilters);
+    handleFilters(newFilters);
+  }, [filters, handleFilters, options]);
 
   // ========== valor do contexto e envio das funções ========== //
 
@@ -101,7 +125,12 @@ function Provider({ children }) {
     filterState,
     filterPlanetsButton,
     options,
-  }), [filteredPlanets, filterByName, filterState, filterPlanetsButton, options]);
+    filters,
+    clearAllFilters,
+    clearFilter,
+  }), [filteredPlanets,
+    filterByName,
+    filterState, filterPlanetsButton, options, filters, clearAllFilters, clearFilter]);
 
   return (
     <MyContext.Provider value={ contextValue }>

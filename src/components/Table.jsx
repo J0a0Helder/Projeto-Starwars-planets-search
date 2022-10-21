@@ -10,7 +10,11 @@ function Table() {
     setFilterState,
     filterState,
     filterPlanetsButton,
-    options } = useContext(MyContext);
+    options,
+    filters,
+    clearAllFilters,
+    clearFilter,
+  } = useContext(MyContext);
 
   const { nome } = filterByName;
   const { coluna, operador, valor } = filterState;
@@ -115,7 +119,38 @@ function Table() {
           Filtrar
         </button>
 
+        {' '}
+
+        <button
+          type="button"
+          data-testid="button-remove-filters"
+          onClick={ () => clearAllFilters() }
+        >
+          Limpar Filtros
+        </button>
+
       </header>
+
+      <section>
+        {
+          filters.length > 0 && filters.map((e, i) => (
+            <p key={ i } data-testid="filter">
+              { e.coluna }
+              {' '}
+              {e.operador}
+              {' '}
+              {e.valor}
+              {' '}
+              <button
+                type="button"
+                onClick={ () => clearFilter(e) }
+              >
+                Remover Filtro
+              </button>
+            </p>))
+        }
+      </section>
+
       <table>
         <thead>
           <tr>
